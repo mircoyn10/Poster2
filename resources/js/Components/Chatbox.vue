@@ -202,17 +202,26 @@ const submitPrompt = async () => {
       platforms: selectedSocials.value
     });
 
-    totalTokens.value = response.data.token;
-    totalCoins.value = response.data.coins;
-    promptHistory.value.unshift({
-      prompt: userPrompt.value,
-      response: response.data.responses
-    });
-    userPrompt.value = '';
+    if (response.data.responses) {
+      // Update the total tokens and coins
+      
+
+      // Update the chat history
+      promptHistory.value.unshift({
+        prompt: userPrompt.value,
+        response: response.data.responses
+      });
+
+      // Clear the prompt field
+      userPrompt.value = '';
+    } else {
+      console.error('Invalid response structure from backend', response.data);
+    }
   } catch (error) {
     console.error('Error submitting prompt:', error);
   }
 };
+
 
 // On component mount
 onMounted(async () => {
