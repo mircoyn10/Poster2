@@ -19,8 +19,8 @@ class AddCoinsToUsersTable extends Migration
     }
 
     /**
-     * Reverse the migrations.
-     *
+     * Reverse the migrations. proviami
+     *gvg
      * @return void
      */
     public function down()
