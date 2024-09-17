@@ -1,3 +1,110 @@
+<script setup>
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { faInstagram, faTiktok, faTwitter, faFacebook } from '@fortawesome/free-brands-svg-icons';
+
+// Add icons to the library
+library.add(faInstagram, faTiktok, faTwitter, faFacebook);
+
+// Reactive data
+const userPrompt = ref('');
+const userCoin = ref(0); // Reactive coin count
+const selectedSocials = ref({
+  instagram: false,
+  tiktok: false,
+  twitter: false,
+  facebook: false
+});
+const promptHistory = ref([]);
+const isAuthenticated = ref(true);
+
+// Axios configuration
+axios.defaults.withCredentials = true;
+axios.defaults.baseURL = 'http://127.0.0.1:8000';
+axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+
+// Function to load saved history
+const loadSavedHistory = async () => {
+  try {
+    const result = await axios.get('/api/search-history');
+    promptHistory.value = result.data;
+  } catch (error) {
+    console.error('Error loading search history:', error);
+  }
+};
+
+// Recuperiamo i coin quando il componente viene montato
+const loadUserCoins = async () => {
+  try {
+    const response = await axios.get('/user/coin');
+    userCoin.value = response.data.coin; // Impostiamo il valore dei coin
+  } catch (error) {
+    console.error('Errore nel recupero dei coin:', error.response ? error.response.data : error.message);
+  }
+};
+
+// Function to toggle platform selection
+const toggleSelection = (platform) => {
+  selectedSocials.value[platform] = !selectedSocials.value[platform];
+};
+
+// Function to submit the prompt
+const submitPrompt = async () => {
+  const selectedPlatforms = Object.keys(selectedSocials.value).filter(platform => selectedSocials.value[platform]);
+  
+  if (selectedPlatforms.length === 0) {
+    alert('Please select at least one platform.');
+    return;
+  }
+
+  try {
+    const response = await axios.post('/api/generate-content', {
+      prompt: userPrompt.value,
+      platforms: selectedSocials.value
+    });
+
+    if (response.data.responses) {
+      // Update the total coins in real time
+      userCoin.value = response.data.remaining_coins;
+
+      // Update the chat history
+      promptHistory.value.unshift({
+        prompt: userPrompt.value,
+        response: response.data.responses
+      });
+
+      // Clear the prompt field
+      userPrompt.value = '';
+    } else {
+      console.error('Invalid response structure from backend', response.data);
+    }
+  } catch (error) {
+    console.error('Error submitting prompt:', error);
+    if (error.response && error.response.data.error === 'Not enough coins') {
+      alert('Non hai abbastanza coin per generare il contenuto.');
+    }
+  }
+};
+
+// On component mount
+onMounted(async () => {
+  loadSavedHistory();
+  loadUserCoins();
+});
+</script>
+
+
+<style scoped>
+.text-blue-500 {
+  color: #3b82f6;
+}
+.bg-gray-100 {
+  background-color: #f3f4f6;
+}
+</style>
+
 <template>
   <div class="flex flex-col items-center justify-center min-h-screen bg-gray-100">
     <!-- Chatbox principale -->
@@ -7,7 +114,7 @@
         <h1 class="text-3xl font-bold text-gray-900">Poster AI</h1>
         <div class="flex items-center space-x-4">
           
-          <span class="text-3xl font-bold text-gray-900">Coin disponibili: {{ totalCoins }}</span>
+          <span class="text-3xl font-bold text-gray-900">Coin : {{ userCoin }}</span>
         </div>
       </div>
 
@@ -33,7 +140,7 @@
               class="text-white font-semibold text-lg py-2 px-6 rounded-lg transition-transform transform hover:scale-105 flex items-center"
             >
               <font-awesome-icon :icon="['fab', 'instagram']" class="text-xl mr-2" />
-              Instagram
+              
             </button>
             <!-- TikTok -->
             <button
@@ -45,7 +152,7 @@
               class="text-white font-semibold text-lg py-2 px-6 rounded-lg transition-transform transform hover:scale-105 flex items-center"
             >
               <font-awesome-icon :icon="['fab', 'tiktok']" class="text-xl mr-2" />
-              TikTok
+              
             </button>
             <!-- Twitter -->
             <button
@@ -57,7 +164,7 @@
               class="text-white font-semibold text-lg py-2 px-6 rounded-lg transition-transform transform hover:scale-105 flex items-center"
             >
               <font-awesome-icon :icon="['fab', 'twitter']" class="text-xl mr-2" />
-              Twitter
+              
             </button>
             <!-- Facebook -->
             <button
@@ -69,7 +176,7 @@
               class="text-white font-semibold text-lg py-2 px-6 rounded-lg transition-transform transform hover:scale-105 flex items-center"
             >
               <font-awesome-icon :icon="['fab', 'facebook']" class="text-xl mr-2" />
-              Facebook
+              
             </button>
           </div>
 
@@ -139,105 +246,6 @@
     </div>
   </div>
 </template>
-
-<script setup>
-import { ref, onMounted } from 'vue';
-import axios from 'axios';
-import { library } from '@fortawesome/fontawesome-svg-core';
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { faInstagram, faTiktok, faTwitter, faFacebook } from '@fortawesome/free-brands-svg-icons';
-
-// Add icons to the library
-library.add(faInstagram, faTiktok, faTwitter, faFacebook);
-
-// Reactive data
-const userPrompt = ref('');
-const totalTokens = ref(0);
-
-const response = ref(null);
-const selectedSocials = ref({
-  instagram: false,
-  tiktok: false,
-  twitter: false,
-  facebook: false
-});
-const promptHistory = ref([]);
-const isAuthenticated = ref(true);
-
-// Axios configuration
-axios.defaults.withCredentials = true;
-axios.defaults.baseURL = 'http://127.0.0.1:8000';
-axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
-
-// Function to load saved history
-const loadSavedHistory = async () => {
-  try {
-    const result = await axios.get('/api/search-history');
-    promptHistory.value = result.data;
-  } catch (error) {
-    console.error('Error loading search history:', error);
-  }
-};
-
-// Function to load user coins
-
-
-// Function to toggle platform selection
-const toggleSelection = (platform) => {
-  selectedSocials.value[platform] = !selectedSocials.value[platform];
-};
-
-// Function to submit the prompt
-const submitPrompt = async () => {
-  const selectedPlatforms = Object.keys(selectedSocials.value).filter(platform => selectedSocials.value[platform]);
-  
-  if (selectedPlatforms.length === 0) {
-    alert('Please select at least one platform.');
-    return;
-  }
-
-  try {
-    const response = await axios.post('/api/generate-content', {
-      prompt: userPrompt.value,
-      platforms: selectedSocials.value
-    });
-
-    if (response.data.responses) {
-      // Update the total tokens and coins
-      
-
-      // Update the chat history
-      promptHistory.value.unshift({
-        prompt: userPrompt.value,
-        response: response.data.responses
-      });
-
-      // Clear the prompt field
-      userPrompt.value = '';
-    } else {
-      console.error('Invalid response structure from backend', response.data);
-    }
-  } catch (error) {
-    console.error('Error submitting prompt:', error);
-  }
-};
-
-
-// On component mount
-onMounted(async () => {
-  loadSavedHistory();
-  loadUserCoins();
-});
-</script>
-
-<style scoped>
-.text-blue-500 {
-  color: #3b82f6;
-}
-.bg-gray-100 {
-  background-color: #f3f4f6;
-}
-</style>
 
 
   

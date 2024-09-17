@@ -4,30 +4,21 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddCoinsToUsersTable extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->integer('coins')->default(100); // Aggiungi il campo `coins` con valore di default 100
+            $table->integer('coin')->default(100)->after('email'); // Aggiungi il campo coin dopo l'email
         });
     }
 
-    /**
-     * Reverse the migrations. proviami
-     *gvg
-     * @return void
-     */
     public function down()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('coins');
+            $table->dropColumn('coin'); // Rimuovi il campo se la migration viene eseguita in rollback
         });
     }
-}
-
+};

@@ -3,9 +3,14 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Illuminate\Http\Request;
 
 
-
+Route::middleware('web')->get('/user/coin', function (Request $request) {
+    return response()->json([
+        'coin' => $request->user()->coin, // Restituisce il numero di coin dell'utente autenticato
+    ]);
+});
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [

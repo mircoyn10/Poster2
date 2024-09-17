@@ -22,7 +22,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'coins', // Aggiungi questo campo per la massa assegnabile
+        'coin', // Aggiungi questo campo per la massa assegnabile
     ];
 
     /**
