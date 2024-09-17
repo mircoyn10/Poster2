@@ -4,7 +4,9 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
+use App\Http\Controllers\BuyCoinsController;
 
+Route::get('/buy-coins', [BuyCoinsController::class, 'index'])->name('buy-coins');
 
 Route::middleware('web')->get('/user/coin', function (Request $request) {
     return response()->json([

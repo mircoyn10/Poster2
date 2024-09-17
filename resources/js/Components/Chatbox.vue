@@ -110,13 +110,18 @@ onMounted(async () => {
     <!-- Chatbox principale -->
     <div class="bg-white shadow-lg rounded-xl p-8 max-w-3xl w-full">
       <!-- Logo e Titolo -->
-      <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold text-gray-900">Poster AI</h1>
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center ">
+            <h1 class="text-3xl font-bold text-gray-900">Poster AI</h1>
+            <img src="http://127.0.0.1:8000/storage/img/PosterLogo2.png" alt="Poster Logo" style="max-height: 5rem;" />
+        </div>
+        
         <div class="flex items-center space-x-4">
-          
-          <span class="text-3xl font-bold text-gray-900">Coin : {{ userCoin }}</span>
+            <span class="text-3xl font-bold text-gray-900">Coin : {{ userCoin }}</span>
         </div>
       </div>
+
+
 
       <!-- Chatbox -->
       <div class="space-y-6">
@@ -137,10 +142,9 @@ onMounted(async () => {
                 'bg-indigo-600': selectedSocials.instagram,
                 'bg-gray-300': !selectedSocials.instagram
               }"
-              class="text-white font-semibold text-lg py-2 px-6 rounded-lg transition-transform transform hover:scale-105 flex items-center"
+              class="text-white font-semibold text-lg w-16 h-16 rounded-lg transition-transform transform hover:scale-105 flex items-center justify-center"
             >
-              <font-awesome-icon :icon="['fab', 'instagram']" class="text-xl mr-2" />
-              
+              <font-awesome-icon :icon="['fab', 'instagram']" class="text-2xl" />
             </button>
             <!-- TikTok -->
             <button
@@ -149,7 +153,7 @@ onMounted(async () => {
                 'bg-pink-600': selectedSocials.tiktok,
                 'bg-gray-300': !selectedSocials.tiktok
               }"
-              class="text-white font-semibold text-lg py-2 px-6 rounded-lg transition-transform transform hover:scale-105 flex items-center"
+              class="text-white font-semibold text-lg w-16 h-16 rounded-lg transition-transform transform hover:scale-105 flex items-center justify-center"
             >
               <font-awesome-icon :icon="['fab', 'tiktok']" class="text-xl mr-2" />
               
@@ -161,7 +165,7 @@ onMounted(async () => {
                 'bg-blue-600': selectedSocials.twitter,
                 'bg-gray-300': !selectedSocials.twitter
               }"
-              class="text-white font-semibold text-lg py-2 px-6 rounded-lg transition-transform transform hover:scale-105 flex items-center"
+              class="text-white font-semibold text-lg w-16 h-16 rounded-lg transition-transform transform hover:scale-105 flex items-center justify-center"
             >
               <font-awesome-icon :icon="['fab', 'twitter']" class="text-xl mr-2" />
               
@@ -173,7 +177,7 @@ onMounted(async () => {
                 'bg-blue-700': selectedSocials.facebook,
                 'bg-gray-300': !selectedSocials.facebook
               }"
-              class="text-white font-semibold text-lg py-2 px-6 rounded-lg transition-transform transform hover:scale-105 flex items-center"
+              class="text-white font-semibold text-lg w-16 h-16 rounded-lg transition-transform transform hover:scale-105 flex items-center justify-center"
             >
               <font-awesome-icon :icon="['fab', 'facebook']" class="text-xl mr-2" />
               
