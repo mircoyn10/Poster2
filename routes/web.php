@@ -5,6 +5,11 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use App\Http\Controllers\BuyCoinsController;
+use App\Models\CoinPackage;
+use App\Http\Controllers\CoinPackageControllerController;
+
+
+
 
 Route::get('/buy-coins', [BuyCoinsController::class, 'index'])->name('buy-coins');
 

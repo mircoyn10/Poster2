@@ -139,7 +139,7 @@ onMounted(async () => {
             <button
               @click="toggleSelection('instagram')"
               :class="{
-                'bg-indigo-600': selectedSocials.instagram,
+                'bg-orange-600': selectedSocials.instagram,
                 'bg-gray-300': !selectedSocials.instagram
               }"
               class="text-white font-semibold text-lg w-16 h-16 rounded-lg transition-transform transform hover:scale-105 flex items-center justify-center"
@@ -162,7 +162,7 @@ onMounted(async () => {
             <button
               @click="toggleSelection('twitter')"
               :class="{
-                'bg-blue-600': selectedSocials.twitter,
+                'bg-blue-300': selectedSocials.twitter,
                 'bg-gray-300': !selectedSocials.twitter
               }"
               class="text-white font-semibold text-lg w-16 h-16 rounded-lg transition-transform transform hover:scale-105 flex items-center justify-center"
