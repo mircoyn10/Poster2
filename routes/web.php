@@ -8,6 +8,15 @@ use App\Http\Controllers\BuyCoinsController;
 use App\Models\CoinPackage;
 use App\Http\Controllers\CoinPackageControllerController;
 use App\Http\Controllers\PaymentController;
+// routes/web.php (o routes/api.php se preferisci mantenere la separazione)
+use App\Http\Controllers\SearchHistoryController;
+use App\Http\Controllers\ClearHistoryController;
+
+Route::get('/search-history', [SearchHistoryController::class, 'getSearchHistory']);
+Route::post('/clear-history', [ClearHistoryController::class, 'clearHistory']);
+// Middleware 'auth' verifica che l'utente sia autenticato via sessione
+
+
 // Route per gestire il ritorno da PayPal dopo l'approvazione
 Route::get('/payment/success', [PaymentController::class, 'executePayment'])->name('payment.success');
 Route::get('/payment/cancel', [PaymentController::class, 'executePayment'])->name('payment.cancel');

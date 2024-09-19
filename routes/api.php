@@ -10,6 +10,7 @@ use App\Http\Controllers\BuyCoinsController;
 use App\Http\Controllers\PaymentController;
 
 
+
 Route::get('/coin-packages', function () {
     return CoinPackage::all();
 })->middleware('web');
