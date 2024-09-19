@@ -7,9 +7,12 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\BuyCoinsController;
 use App\Models\CoinPackage;
 use App\Http\Controllers\CoinPackageControllerController;
-
-
-
+use App\Http\Controllers\PaymentController;
+// Route per gestire il ritorno da PayPal dopo l'approvazione
+Route::get('/payment/success', [PaymentController::class, 'executePayment'])->name('payment.success');
+Route::get('/payment/cancel', [PaymentController::class, 'executePayment'])->name('payment.cancel');
+Route::post('/payment/create', [PaymentController::class, 'createPayment'])->Middleware('web');
+Route::post('/payment/execute', [PaymentController::class, 'executePayment'])->Middleware('web');
 
 Route::get('/buy-coins', [BuyCoinsController::class, 'index'])->name('buy-coins');
 

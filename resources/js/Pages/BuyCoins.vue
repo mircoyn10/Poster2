@@ -22,19 +22,34 @@ const fetchPackages = async () => {
 // Funzione per l'acquisto di coin tramite pacchetto selezionato
 const purchaseCoins = async (packageId) => {
   try {
+    // Step 1: Crea l'ordine
     const { data } = await axios.post('/payment/create', { package_id: packageId });
-    const orderID = data.id;
+    console.log('Payment creation response:', data);
 
-    // Redirige a PayPal per completare il pagamento
-    window.open(data.links[1].href, '_blank');
-    
-    // Gestisci l'ordine dopo il pagamento
-    const result = await axios.post('/payment/execute', { orderID, package_id: packageId });
-    alert(result.data.message);
+    // Step 2: Reindirizza l'utente alla pagina di approvazione di PayPal
+    if (data.status === "CREATED") {
+      const approvalUrl = data.links.find(link => link.rel === 'approve').href;
+      window.location.href = approvalUrl; // Reindirizza l'utente a PayPal
+    } else {
+      throw new Error('Order not created');
+    }
   } catch (error) {
-    alert('Payment failed');
+    // Gestione degli errori
+    console.error('Payment creation error:', error);
+    if (error.response) {
+      console.error('Error response:', error.response.data);
+      alert(`Payment creation failed: ${error.response.data.message || error.response.statusText}`);
+    } else if (error.request) {
+      console.error('Error request:', error.request);
+      alert('Payment creation failed: No response received from server');
+    } else {
+      console.error('Error message:', error.message);
+      alert(`Payment creation failed: ${error.message}`);
+    }
   }
 };
+
+
 
 // Monta il componente e carica i pacchetti
 onMounted(fetchPackages);
@@ -102,7 +117,7 @@ onMounted(fetchPackages);
                                 'bg-gray-600 hover:bg-gray-700': index === 1,      // Silver
                                 'bg-yellow-800 hover:bg-yellow-900': index === 2   // Gold
                             }">
-                        Purchase Now
+                        Pay with Paypal
                     </button>
                   </div>
                 </div>
