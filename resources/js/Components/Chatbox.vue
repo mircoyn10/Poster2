@@ -27,6 +27,7 @@ const platformLoading = ref({
   twitter: false,
   facebook: false
 });
+const notificationMessage = ref('');
 
 // Axios configuration
 axios.defaults.withCredentials = true;
@@ -64,6 +65,12 @@ const loadUserCoins = async () => {
 // Toggle platform selection
 const toggleSelection = (platform) => {
   selectedSocials.value[platform] = !selectedSocials.value[platform];
+};
+
+// Show notification message
+const showNotification = (message) => {
+  notificationMessage.value = message;
+  setTimeout(() => notificationMessage.value = '', 3000);
 };
 
 // Submit the prompt
@@ -121,6 +128,7 @@ const clearHistory = async () => {
   try {
     await axios.post('/clear-history');
     promptHistory.value = [];
+    showNotification('Cronologia cancellata con successo');
   } catch (error) {
     console.error('Error clearing history:', error);
   }
@@ -129,7 +137,7 @@ const clearHistory = async () => {
 // Copy to clipboard
 const copyToClipboard = (text) => {
   navigator.clipboard.writeText(text).then(() => {
-    alert('Copied to clipboard!');
+    showNotification('Copied to clipboard!');
   }).catch(err => {
     console.error('Failed to copy: ', err);
   });
@@ -143,19 +151,86 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.text-blue-500 { color: #3b82f6; }
-.bg-gray-100 { background-color: #f3f4f6; }
-.fade-enter-active, .fade-leave-active { transition: opacity 0.5s; }
-.fade-enter, .fade-leave-to { opacity: 0; }
-.platform-icon { font-size: 1.5rem; margin-right: 0.5rem; }
-.copy-button { opacity: 0; transition: opacity 0.3s; }
-.message-bubble:hover .copy-button { opacity: 1; }
+/* Global styles */
+body {
+  background: #f8fafc;
+}
+
+.text-blue-500 {
+  color: #3b82f6;
+}
+
+.bg-gray-100 {
+  background-color: #f3f4f6;
+}
+
+/* Animazioni ed effetti di interazione */
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.5s;
+}
+
+.fade-enter, .fade-leave-to {
+  opacity: 0;
+}
+
+/* Pulsante di invio con effetto hover */
+button:active {
+  transform: scale(0.95);
+}
+
+.platform-icon {
+  font-size: 1.5rem;
+  margin-right: 0.5rem;
+}
+
+/* Copia pulsante che appare al passaggio del mouse */
+.copy-button {
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.message-bubble:hover .copy-button {
+  opacity: 1;
+}
+
+/* Modernizzazione del layout */
+.bg-custom-background {
+  background: #e5e7eb;
+}
+
+.bg-custom-chatbox {
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+.platform-selected {
+  border: 2px solid #34d399;
+}
+
+.loader-content {
+  color: white;
+  font-size: 2rem;
+}
 </style>
 
 <template>
-  <div class="flex flex-col items-center justify-center min-h-screen p-4">
+  <!-- Notifica temporanea -->
+  <div v-if="notificationMessage" class="fixed top-4 right-4 bg-indigo-500 text-white p-4 rounded-lg shadow-lg z-50 transition-opacity duration-300" :class="{'opacity-0': !notificationMessage}">
+    {{ notificationMessage }}
+  </div>
+
+  <!-- Caricamento globale -->
+  <div v-if="isLoading" class="fixed-loader">
+    <div class="loader-content flex items-center space-x-4">
+      <font-awesome-icon :icon="['fas', 'spinner']" spin />
+      <span>Generazione contenuto in corso...</span>
+    </div>
+  </div>
+
+  <div class="flex flex-col items-center justify-center min-h-screen p-4 bg-custom-background">
     <!-- Chatbox principale -->
-    <div class="bg-white shadow-lg rounded-xl p-8 max-w-3xl w-full mb-8">
+    <div class="bg-custom-chatbox shadow-lg rounded-xl p-6 max-w-2xl w-full mb-8">
       <!-- Logo e Titolo -->
       <div class="flex items-center justify-between mb-6">
         <div class="flex items-center space-x-4">
@@ -163,7 +238,7 @@ onMounted(async () => {
           <img src="http://127.0.0.1:8000/storage/img/PosterLogo2.png" alt="Poster Logo" class="h-12" />
         </div>
         <div class="flex items-center space-x-4">
-          <span class="text-3xl font-bold text-indigo-600">{{ userCoin }} Coins</span>
+          <span class="text-2xl font-bold text-indigo-600">{{ userCoin }} Coins</span>
         </div>
       </div>
 
@@ -171,26 +246,26 @@ onMounted(async () => {
       <div class="space-y-6">
         <textarea
           v-model="userPrompt"
-          placeholder="Inserisci il tuo prompt qui..."
+          :placeholder="selectedSocials.instagram ? 'Inserisci il prompt per Instagram...' : selectedSocials.tiktok ? 'Inserisci il prompt per TikTok...' : 'Inserisci il tuo prompt qui...'"
           :disabled="isLoading"
-          class="w-full h-32 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-gray-700 text-lg transition-all duration-300 ease-in-out"
+          class="w-full h-24 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-gray-700 text-lg transition-all duration-300 ease-in-out"
         ></textarea>
 
         <!-- Selezione delle piattaforme e invio -->
         <div class="flex flex-col space-y-4">
           <!-- Selezione delle piattaforme -->
-          <div class="flex justify-around space-x-4">
+          <div class="flex justify-between space-x-2">
             <button
               v-for="platform in ['instagram', 'tiktok', 'twitter', 'facebook']"
               :key="platform"
               @click="toggleSelection(platform)"
               :disabled="isLoading"
               :class="{
-                'bg-indigo-600': selectedSocials[platform],
+                'bg-indigo-600 platform-selected': selectedSocials[platform],
                 'bg-gray-300': !selectedSocials[platform],
                 'opacity-50 cursor-not-allowed': isLoading
               }"
-              class="text-white font-semibold text-lg w-16 h-16 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105 flex items-center justify-center"
+              class="text-white font-semibold text-lg w-16 h-16 rounded-full transition-all duration-300 ease-in-out transform hover:scale-105 flex items-center justify-center"
             >
               <font-awesome-icon :icon="['fab', platform]" class="text-2xl" />
             </button>
@@ -209,12 +284,12 @@ onMounted(async () => {
     </div>
 
     <!-- Contenitore della cronologia -->
-    <div class="bg-white shadow-lg rounded-xl p-8 max-w-3xl w-full h-96 overflow-y-auto mb-8">
+    <div class="bg-custom-chatbox shadow-lg rounded-xl p-6 max-w-2xl w-full h-80 overflow-y-auto mb-8">
       <div class="flex justify-between items-center mb-6">
         <h2 class="text-2xl font-bold text-gray-900">Chat History</h2>
         <button
           @click="clearHistory"
-          class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-full transition-colors duration-300 flex items-center"
+          class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-full transition-transform duration-300 transform hover:scale-105 shadow-md"
         >
           <font-awesome-icon :icon="['fas', 'trash']" class="mr-2" />
           Clear History
@@ -222,11 +297,11 @@ onMounted(async () => {
       </div>
 
       <div v-if="promptHistory.length > 0" class="space-y-4">
-        <div v-for="(entry, index) in promptHistory" :key="index" class="space-y-2 pb-4 border-b border-gray-200 last:border-b-0">
+        <div v-for="(entry, index) in promptHistory" :key="index" class="space-y-2 pb-4 border-b border-gray-200 last:border-b-0 fade-enter-active">
           <div class="text-sm text-gray-500">{{ entry.timestamp }}</div>
           <div v-if="entry.prompt">
             <div class="flex justify-end">
-              <div class="bg-indigo-500 text-white p-3 rounded-2xl max-w-[80%] shadow-md">
+              <div class="bg-indigo-500 text-white p-3 rounded-2xl max-w-[75%] shadow-md">
                 <p class="text-sm font-medium mb-1">Tu:</p>
                 <p class="text-base leading-tight">{{ entry.prompt }}</p>
               </div>
@@ -235,7 +310,7 @@ onMounted(async () => {
             <div v-if="entry.responses">
               <div v-for="response in entry.responses" :key="response.platform" class="flex justify-start mt-3">
                 <div 
-                  class="bg-gray-100 text-gray-800 p-3 rounded-2xl max-w-[80%] shadow-md border-l-4 relative message-bubble"
+                  class="bg-gray-100 text-gray-800 p-3 rounded-2xl max-w-[75%] shadow-md border-l-4 relative message-bubble"
                   :class="{
                     'border-pink-500': response.platform === 'instagram',
                     'border-blue-400': response.platform === 'tiktok',
@@ -251,6 +326,7 @@ onMounted(async () => {
                         'text-blue-500': response.platform === 'twitter',
                         'text-blue-700': response.platform === 'facebook',
                       }"
+                      :spin="response.isGenerating"
                     />
                     <p class="text-sm font-medium">Poster AI ({{ response.platform }}):</p>
                   </div>
@@ -278,3 +354,4 @@ onMounted(async () => {
     </div>
   </div>
 </template>
+
