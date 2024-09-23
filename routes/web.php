@@ -11,6 +11,17 @@ use App\Http\Controllers\PaymentController;
 // routes/web.php (o routes/api.php se preferisci mantenere la separazione)
 use App\Http\Controllers\SearchHistoryController;
 use App\Http\Controllers\ClearHistoryController;
+use App\Http\Controllers\SocialiteController;
+use App\Http\Controllers\GoogleTrendsController;
+
+
+Route::get('/trends', [GoogleTrendsController::class, 'index'])->name('trends.index');
+Route::get('/trends/{country}', [GoogleTrendsController::class, 'fetchTrends'])->name('trends.fetch');
+Route::get('auth/{provider}', [SocialiteController::class, 'redirectToProvider'])->name('socialite.redirect');
+Route::get('auth/{provider}/callback', [SocialiteController::class, 'handleProviderCallback'])->name('socialite.callback');
+
+
+
 
 Route::get('/search-history', [SearchHistoryController::class, 'getSearchHistory']);
 Route::post('/clear-history', [ClearHistoryController::class, 'clearHistory']);
@@ -24,6 +35,7 @@ Route::post('/payment/create', [PaymentController::class, 'createPayment'])->Mid
 Route::post('/payment/execute', [PaymentController::class, 'executePayment'])->Middleware('web');
 
 Route::get('/buy-coins', [BuyCoinsController::class, 'index'])->name('buy-coins');
+Route::get('/calendar', [CalendarController::class, 'index'])->name('calendare');
 
 Route::middleware('web')->get('/user/coin', function (Request $request) {
     return response()->json([
