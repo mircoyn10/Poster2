@@ -44,7 +44,7 @@ Route::post('/payment/create', [PaymentController::class, 'createPayment'])->Mid
 Route::post('/payment/execute', [PaymentController::class, 'executePayment'])->Middleware('web');
 
 Route::get('/buy-coins', [BuyCoinsController::class, 'index'])->name('buy-coins');
-Route::get('/calendar', [CalendarController::class, 'index'])->name('calendare');
+
 
 Route::middleware('web')->get('/user/coin', function (Request $request) {
     return response()->json([
