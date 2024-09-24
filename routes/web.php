@@ -8,7 +8,7 @@ use App\Http\Controllers\BuyCoinsController;
 use App\Models\CoinPackage;
 use App\Http\Controllers\CoinPackageControllerController;
 use App\Http\Controllers\PaymentController;
-// routes/web.php (o routes/api.php se preferisci mantenere la separazione)
+
 use App\Http\Controllers\SearchHistoryController;
 use App\Http\Controllers\ClearHistoryController;
 use App\Http\Controllers\SocialiteController;
@@ -26,8 +26,7 @@ Route::get('/trends', function () {
 
 Route::get('/trends/{country}', [GoogleTrendsController::class, 'fetchTrends'])->name('trends.fetch');
 
-Route::get('auth/{provider}', [SocialiteController::class, 'redirectToProvider'])->name('socialite.redirect');
-Route::get('auth/{provider}/callback', [SocialiteController::class, 'handleProviderCallback'])->name('socialite.callback');
+
 
 
 
