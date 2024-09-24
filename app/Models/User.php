@@ -59,4 +59,10 @@ class User extends Authenticatable
             'coins' => 'integer', // Aggiungi questo cast per il campo `coins`
         ];
     }
+    // In app/Models/User.php
+
+    public function events()
+    {
+        return $this->hasMany(Event::class);
+    }
 }

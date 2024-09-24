@@ -18,6 +18,14 @@ use App\Http\Controllers\SocialiteController;
 use App\Http\Controllers\GoogleTrendsController;
 // Gestisce la rotta /trends senza parametro
 
+use App\Http\Controllers\EventController;
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/calendar', function () {
+        return inertia('Calendar'); // Assumendo che tu stia usando InertiaJS
+    });
+});
+
 
 Route::get('/trends', function () {
     return Inertia::render('Trends'); // Nome del file Vue senza estensione

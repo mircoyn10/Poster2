@@ -80,6 +80,7 @@ const toggleNavigationDropdown = () => {
                             >
                                 
                                 <Link href="/trends" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Trends</Link>
+                                <Link href="/calendar" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Calendar</Link>
                             </div>
                         </div>
 
