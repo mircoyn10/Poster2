@@ -25,14 +25,12 @@ const openDashboardMenu = () => {
 const showingNavigationDropdown = ref(false);
 const isDashboardMenuOpen = ref(false); // Gestione del sottomenu Dashboard
 
-// Funzione per cambiare il team
 const switchToTeam = (team) => {
     router.put(route('current-team.update'), {
         team_id: team.id,
     });
 };
 
-// Funzione di logout
 const logout = () => {
     router.post(route('logout'));
 };
@@ -126,26 +124,46 @@ const toggleNavigationDropdown = () => {
                 <!-- Menu responsive -->
                 <div v-if="showingNavigationDropdown" class="sm:hidden transition-opacity duration-300 ease-in-out">
                     <div class="pt-2 pb-3 space-y-1">
-                        <ResponsiveNavLink :href="route('dashboard')" :active="route().current('dashboard')">Dashboard</ResponsiveNavLink>
-                        <ResponsiveNavLink :href="route('buy-coins')" :active="route().current('buy-coins')">
+                        <ResponsiveNavLink :href="route('dashboard')" :active="route().current('dashboard')">
+                            Dashboard
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink :href="route('buy-coins')" :active="route().current('buy-coins')" class="hover:bg-yellow-100 text-yellow-700">
                             <FontAwesomeIcon :icon="faCoins" class="mr-2" />
                             Buy Coins
                         </ResponsiveNavLink>
                     </div>
 
+                    <!-- Responsive Settings Options -->
                     <div class="pt-4 pb-1 border-t border-gray-200">
                         <div class="flex items-center px-4">
-                            <img class="h-10 w-10 rounded-full" :src="$page.props.auth.user.profile_photo_url" :alt="$page.props.auth.user.name">
-                            <div class="ml-3">
-                                <div class="font-medium text-base text-gray-800">{{ $page.props.auth.user.name }}</div>
-                                <div class="font-medium text-sm text-gray-500">{{ $page.props.auth.user.email }}</div>
+                            <div v-if="$page.props.jetstream.managesProfilePhotos" class="shrink-0 me-3">
+                                <img class="h-10 w-10 rounded-full object-cover" :src="$page.props.auth.user.profile_photo_url" :alt="$page.props.auth.user.name">
+                            </div>
+
+                            <div>
+                                <div class="font-medium text-base text-gray-800">
+                                    {{ $page.props.auth.user.name }}
+                                </div>
+                                <div class="font-medium text-sm text-gray-500">
+                                    {{ $page.props.auth.user.email }}
+                                </div>
                             </div>
                         </div>
 
                         <div class="mt-3 space-y-1">
-                            <ResponsiveNavLink :href="route('profile.show')">Profile</ResponsiveNavLink>
-                            <form @submit.prevent="logout">
-                                <ResponsiveNavLink as="button">Log Out</ResponsiveNavLink>
+                            <ResponsiveNavLink :href="route('profile.show')" :active="route().current('profile.show')">
+                                Profile
+                            </ResponsiveNavLink>
+
+                            <ResponsiveNavLink v-if="$page.props.jetstream.hasApiFeatures" :href="route('api-tokens.index')" :active="route().current('api-tokens.index')">
+                                API Tokens
+                            </ResponsiveNavLink>
+
+                            <!-- Authentication -->
+                            <form method="POST" @submit.prevent="logout">
+                                <ResponsiveNavLink as="button">
+                                    Log Out
+                                </ResponsiveNavLink>
                             </form>
                         </div>
                     </div>
@@ -154,7 +172,7 @@ const toggleNavigationDropdown = () => {
 
             <!-- Header -->
             <header v-if="$slots.header" class="bg-white shadow">
-                <div class="container mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                     <slot name="header" />
                 </div>
             </header>
@@ -166,6 +184,51 @@ const toggleNavigationDropdown = () => {
         </div>
     </div>
 </template>
+
+<style scoped>
+.navbar {
+    background-color: #fff;
+}
+
+nav {
+    background-color: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+button {
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+button:hover {
+    background-color: #f3f4f6;
+    color: #374151;
+}
+</style>
+
+
+<style scoped>
+.container {
+    max-width: 1024px;
+    margin: 0 auto;
+}
+
+nav {
+    background-color: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+button {
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+button:hover {
+    background-color: #f3f4f6;
+    color: #374151;
+}
+</style>
+
 
 <style scoped>
 .container {

@@ -8,10 +8,6 @@ use App\Models\CoinPackage;
 use App\Http\Controllers\BuyCoinsController;
 
 use App\Http\Controllers\PaymentController;
-use App\Http\Controllers\GoogleTrendsController;
-
-Route::get('/trends/{country}', [GoogleTrendsController::class, 'fetchTrends']);
-
 
 
 
