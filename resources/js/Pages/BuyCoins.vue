@@ -9,49 +9,33 @@ axios.defaults.baseURL = 'http://127.0.0.1:8000';
 
 const cardData = ref([]);
 
-// Recupera i pacchetti dal backend all'avvio del componente
+// Fetch coin packages
 const fetchPackages = async () => {
   try {
     const { data } = await axios.get('/api/coin-packages');
-    cardData.value = data; // Imposta i pacchetti di monete recuperati
+    cardData.value = data;
   } catch (error) {
-    console.error('Errore nel caricamento dei pacchetti:', error);
+    console.error('Error loading packages:', error);
   }
 };
 
-// Funzione per l'acquisto di coin tramite pacchetto selezionato
+// Purchase coins
 const purchaseCoins = async (packageId) => {
   try {
-    // Step 1: Crea l'ordine
     const { data } = await axios.post('/payment/create', { package_id: packageId });
-    console.log('Payment creation response:', data);
-
-    // Step 2: Reindirizza l'utente alla pagina di approvazione di PayPal
     if (data.status === "CREATED") {
       const approvalUrl = data.links.find(link => link.rel === 'approve').href;
-      window.location.href = approvalUrl; // Reindirizza l'utente a PayPal
+      window.location.href = approvalUrl;
     } else {
       throw new Error('Order not created');
     }
   } catch (error) {
-    // Gestione degli errori
     console.error('Payment creation error:', error);
-    if (error.response) {
-      console.error('Error response:', error.response.data);
-      alert(`Payment creation failed: ${error.response.data.message || error.response.statusText}`);
-    } else if (error.request) {
-      console.error('Error request:', error.request);
-      alert('Payment creation failed: No response received from server');
-    } else {
-      console.error('Error message:', error.message);
-      alert(`Payment creation failed: ${error.message}`);
-    }
+    alert(`Payment creation failed: ${error.message}`);
   }
 };
 
-
-
-// Monta il componente e carica i pacchetti
+// Fetch data on mount
 onMounted(fetchPackages);
 </script>
 
@@ -65,63 +49,43 @@ onMounted(fetchPackages);
       </h2>
     </template>
 
-    <!-- Page Content -->
-    <main>
-      <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-          <div class="bg-white shadow sm:rounded-lg">
-            <div class="px-4 py-5 sm:px-6">
-              <h3 class="text-lg font-medium leading-6 text-gray-900">Select Your Coin Package</h3>
-              <p class="mt-1 text-sm text-gray-500">
-                Coins allow you to create engaging content on multiple social platforms. Choose the package that fits your needs and start generating content today!
-              </p>
-            </div>
-            <div class="border-t border-gray-200">
-              <dl>
-                <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                  <div class="sm:col-span-1">
-                    <h3 class="text-lg font-medium leading-6 text-gray-900">Available Packages</h3>
-                  </div>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  <!-- Cicla sui pacchetti caricati dal database -->
-                  <div v-for="(card, index) in cardData" :key="card.id" class="border p-6 m-2.5 rounded-lg shadow-lg text-center transition transform hover:scale-105 hover:shadow-xl"
-                        :class="{
-                        'bg-yellow-100 border-yellow-400': index === 0, // Bronze package
-                        'bg-gray-200 border-gray-500': index === 1,     // Silver package
-                        'bg-yellow-300 border-yellow-600': index === 2  // Gold package
-                        }">
-                    <!-- Tier Title -->
-                    <h4 class="text-2xl font-bold" 
-                        :class="{
-                            'text-yellow-700': index === 0, // Bronze
-                            'text-gray-700': index === 1,    // Silver
-                            'text-yellow-800': index === 2   // Gold
-                        }">
-                        {{ index === 0 ? 'Bronze' : index === 1 ? 'Silver' : 'Gold' }} Package
-                    </h4>
-
-                    <!-- Package Price -->
-                    <p class="text-lg font-medium mt-2">{{ card.price }} {{ card.currency }}</p>
-
-                    <!-- Coin Amount -->
-                    <p class="text-md mt-4">
-                        Get <span class="font-semibold">{{ card.coins }}</span> coins to boost your content creation.
-                    </p>
-
-                    <!-- Call to Action Button -->
-                    <button @click="purchaseCoins(card.id)"
-                            class="mt-6 px-6 py-3 rounded-full text-white font-bold text-lg transition transform hover:scale-105"
-                            :class="{
-                                'bg-yellow-600 hover:bg-yellow-700': index === 0,  // Bronze
-                                'bg-gray-600 hover:bg-gray-700': index === 1,      // Silver
-                                'bg-yellow-800 hover:bg-yellow-900': index === 2   // Gold
-                            }">
-                        Pay with Paypal
-                    </button>
-                  </div>
-                </div>
-              </dl>
+    <!-- Main Content -->
+    <main class="py-12 bg-gray-100">
+      <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="bg-white shadow sm:rounded-lg p-8">
+          <div class="text-center mb-8">
+            <h3 class="text-2xl font-bold text-[#00A3E0]">Choose Your Coin Package</h3>
+            <p class="text-gray-500">Coins allow you to create engaging content. Choose the package that fits your needs and start generating content today!</p>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div v-for="(card, index) in cardData" :key="card.id" 
+                 class="p-6 rounded-lg shadow-lg hover:shadow-2xl transition transform hover:scale-105">
+              <div :class="{
+                  'bg-yellow-100 border-yellow-400': index === 0,
+                  'bg-gray-200 border-gray-500': index === 1,
+                  'bg-yellow-300 border-yellow-600': index === 2
+                }" class="p-4 rounded-lg">
+                <h4 :class="{
+                  'text-yellow-700': index === 0,
+                  'text-gray-700': index === 1,
+                  'text-yellow-800': index === 2
+                }" class="text-2xl font-bold mb-2">
+                  {{ index === 0 ? 'Bronze' : index === 1 ? 'Silver' : 'Gold' }} Package
+                </h4>
+                <p class="text-lg text-gray-700">{{ card.price }} {{ card.currency }}</p>
+                <p class="mt-4 text-gray-600">Get <span class="font-semibold">{{ card.coins }}</span> coins.</p>
+              </div>
+              
+              <button @click="purchaseCoins(card.id)"
+                      class="mt-6 w-full py-3 text-white rounded-lg text-lg font-bold transition transform hover:scale-105"
+                      :class="{
+                        'bg-yellow-600 hover:bg-yellow-700': index === 0,
+                        'bg-gray-600 hover:bg-gray-700': index === 1,
+                        'bg-yellow-800 hover:bg-yellow-900': index === 2
+                      }">
+                Pay with PayPal
+              </button>
             </div>
           </div>
         </div>
@@ -131,7 +95,7 @@ onMounted(fetchPackages);
 </template>
 
 <style scoped>
-/* Additional Styles */
+/* Animation & Card Styling */
 .hover\:scale-105 {
   transition: transform 0.3s ease-in-out;
 }
