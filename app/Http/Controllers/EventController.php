@@ -39,6 +39,28 @@ class EventController extends Controller
 
         return response()->json($event, 201);
     }
+    public function destroy($id)
+    {
+        // Assicurati che l'utente sia autenticato
+        if (!auth()->check()) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        // Trova l'evento per l'ID fornito
+        $event = auth()->user()->events()->find($id);
+
+        // Se l'evento non esiste, restituisci un errore
+        if (!$event) {
+            return response()->json(['error' => 'Event not found'], 404);
+        }
+
+        // Elimina l'evento
+        $event->delete();
+
+        // Restituisci una risposta di successo
+        return response()->json(['message' => 'Event deleted successfully'], 200);
+    }
+
 
     // Altri metodi del controller...
 }

@@ -35,7 +35,7 @@
                 <label for="title" class="block text-sm font-medium text-gray-600">Title</label>
                 <input
                   type="text"
-                  v-model="eventTitle"
+                  v-model="eventData.title"
                   id="title"
                   class="block w-full border border-gray-300 rounded-md shadow-sm p-1.5 text-sm focus:ring focus:ring-blue-200"
                   placeholder="Enter event title"
@@ -48,7 +48,7 @@
                 <label for="start" class="block text-sm font-medium text-gray-600">Start Date</label>
                 <input
                   type="datetime-local"
-                  v-model="eventStart"
+                  v-model="eventData.startDate"
                   id="start"
                   class="block w-full border border-gray-300 rounded-md shadow-sm p-1.5 text-sm focus:ring focus:ring-blue-200"
                   required
@@ -60,7 +60,7 @@
                 <label for="end" class="block text-sm font-medium text-gray-600">End Date</label>
                 <input
                   type="datetime-local"
-                  v-model="eventEnd"
+                  v-model="eventData.endDate"
                   id="end"
                   class="block w-full border border-gray-300 rounded-md shadow-sm p-1.5 text-sm focus:ring focus:ring-blue-200"
                   required
@@ -106,7 +106,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, reactive, onMounted } from 'vue';
 import axios from 'axios';
 import { Head } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
@@ -118,11 +118,13 @@ axios.defaults.withCredentials = true;
 axios.defaults.baseURL = 'http://127.0.0.1:8000';
 
 // Form states
-const eventTitle = ref('');
-const eventStart = ref('');
-const eventEnd = ref('');
+const eventData = reactive({
+  title: '',
+  startDate: '',
+  endDate: '',
+});
 const selectedEvent = ref(null);
-const formVisible = ref(false); // Control visibility of the form
+const formVisible = ref(false);
 
 // Calendar options
 const clickTimeout = ref(null);
@@ -132,13 +134,13 @@ const calendarOptions = ref({
   selectable: true,
   dateClick: (info) => {
     if (clickTimeout.value) {
-      clearTimeout(clickTimeout.value); // Double click detected, open form
+      clearTimeout(clickTimeout.value);
       clickTimeout.value = null;
-      openAddEventForm(info.dateStr); // Pass the clicked date
+      openAddEventForm(info.dateStr);
     } else {
       clickTimeout.value = setTimeout(() => {
-        clickTimeout.value = null; // Reset if not a double click
-      }, 300); // Wait for 300ms for a second click
+        clickTimeout.value = null;
+      }, 300);
     }
   },
   events: [],
@@ -149,16 +151,19 @@ const calendarOptions = ref({
 
 // Function to open the form with pre-filled dates
 const openAddEventForm = (dateStr) => {
-  // Pre-fill the start and end date fields
-  const formattedDate = new Date(dateStr).toISOString().slice(0, 16); // Format to 'YYYY-MM-DDTHH:MM'
-  eventStart.value = formattedDate;
-  eventEnd.value = formattedDate;
-  formVisible.value = true; // Show the form
+  const formattedDate = new Date(dateStr).toISOString().slice(0, 16);
+  eventData.startDate = formattedDate;
+  eventData.endDate = formattedDate;
+  formVisible.value = true;
 };
 
 // Function to close the form
 const closeForm = () => {
-  formVisible.value = false; // Hide the form
+  formVisible.value = false;
+  // Reset form data
+  eventData.title = '';
+  eventData.startDate = '';
+  eventData.endDate = '';
 };
 
 // Fetch events
@@ -167,27 +172,30 @@ const fetchEvents = async () => {
     const { data } = await axios.get('/api/events');
     calendarOptions.value.events = data.map((event) => ({
       id: event.id,
-      title: event.title,
-      start: event.start,
-      end: event.end,
+      title: event.title, // Mantieni solo il titolo
+      start: event.start.split('T')[0], // Escludi l'orario dalla data di inizio
+      end: event.end.split('T')[0], // Escludi l'orario dalla data di fine
     }));
   } catch (error) {
     console.error('Error fetching events:', error);
   }
 };
 
+
+
 // Add a new event
 const addEvent = async () => {
   try {
-    const newEvent = { title: eventTitle.value, start: eventStart.value, end: eventEnd.value };
+    const newEvent = {
+      title: eventData.title,
+      start_date: new Date(eventData.startDate).toISOString(),
+      end_date: new Date(eventData.endDate).toISOString(),
+    };
     await axios.post('/api/events', newEvent);
     await fetchEvents();
-    eventTitle.value = '';
-    eventStart.value = '';
-    eventEnd.value = '';
-    formVisible.value = false; // Hide the form after adding event
+    closeForm(); // This will reset the form and close it
   } catch (error) {
-    console.error('Error adding event:', error);
+    console.error('Error adding event:', error.response ? error.response.data : error.message);
   }
 };
 
@@ -213,7 +221,7 @@ onMounted(fetchEvents);
 
 <style scoped>
 form {
-  background-color: rgba(0, 163, 224, 0.2); /* Azzurro del welcome con trasparenza */
+  background-color: rgba(0, 163, 224, 0.2);
   padding: 16px;
   border-radius: 8px;
 }
