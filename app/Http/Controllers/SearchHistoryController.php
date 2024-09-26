@@ -27,4 +27,17 @@ class SearchHistoryController extends Controller
             return response()->json(['error' => 'Utente non autenticato'], 401);
         }
     }
+    public function getUserPrompts()
+    {
+        if (!auth()->check()) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        // Ottieni i prompt e le response dell'utente autenticato
+        $prompts = SearchHistory::where('user_id', auth()->id())
+            ->get(['prompt', 'response']); // Assicurati di recuperare sia `prompt` che `response`
+
+        return response()->json($prompts);
+    }
+
 }

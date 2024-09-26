@@ -12,6 +12,8 @@ class Event extends Model
     protected $fillable = [
         'user_id',
         'title',
+        'prompt',
+        'response', // Aggiungi response
         'start_date',
         'end_date',
     ];

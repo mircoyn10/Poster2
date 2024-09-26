@@ -143,7 +143,7 @@ class GenerateContentController extends Controller
 
         $setting = $platformSettings[$platform];
 
-        return "In {$language}, create an innovative and engaging content idea for {$platform} based on: '{$prompt}'. 
+        return "In {$language},return the name of the {$platform}, and create an innovative and engaging content idea for {$platform} based on: '{$prompt}'. 
         Focus on {$setting['focus']}. 
         Include these elements: {$setting['elements']}.
         Be creative, trendy, and audience-focused. Aim to maximize engagement and virality potential.

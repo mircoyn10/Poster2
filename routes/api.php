@@ -7,8 +7,9 @@ use App\Http\Controllers\GenerateContentController;
 use App\Models\CoinPackage;
 use App\Http\Controllers\BuyCoinsController;
 use App\Http\Controllers\EventController;
-use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\SeoController;
 
+Route::post('/generate-seo-content', [SeoController::class, 'generateSeoContent'])->middleware('web');
 
 Route::apiResource('events', EventController::class)->middleware('web');
 Route::get('/coin-packages', function () {

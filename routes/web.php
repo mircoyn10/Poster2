@@ -14,12 +14,14 @@ use App\Http\Controllers\ClearHistoryController;
 use App\Http\Controllers\SocialiteController;
 
 
-
+Route::get('/user-prompts', [SearchHistoryController::class, 'getUserPrompts'])->middleware('auth');
 use App\Http\Controllers\GoogleTrendsController;
 // Gestisce la rotta /trends senza parametro
 
 use App\Http\Controllers\EventController;
-
+Route::get('/seo', function () {
+    return Inertia::render('Seo');
+});
 Route::middleware(['auth'])->group(function () {
     Route::get('/calendar', function () {
         return inertia('Calendar'); // Assumendo che tu stia usando InertiaJS

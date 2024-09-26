@@ -9,7 +9,6 @@
     <main class="py-12 bg-gray-100">
       <div class="max-w-5xl mx-auto sm:px-6 lg:px-8">
         <div class="bg-white shadow-sm sm:rounded-lg">
-
           <!-- Event Calendar -->
           <div class="p-4">
             <h3 class="text-base font-medium leading-6 text-gray-900 mb-3">Your Events</h3>
@@ -32,7 +31,7 @@
             <form @submit.prevent="addEvent" class="space-y-3 max-w-sm mx-auto">
               <!-- Event Title -->
               <div class="mb-2">
-                <label for="title" class="block text-sm font-medium text-gray-600">Title</label>
+                <label for="title" class="block text-sm font-medium text-gray-600">Event Title</label>
                 <input
                   type="text"
                   v-model="eventData.title"
@@ -41,6 +40,37 @@
                   placeholder="Enter event title"
                   required
                 />
+              </div>
+
+              <!-- Event Prompt (Select) -->
+              <div class="mb-2">
+                <label for="prompt" class="block text-sm font-medium text-gray-600">Event Prompt</label>
+                <select
+                  v-model="eventData.prompt"
+                  id="prompt"
+                  class="block w-full border border-gray-300 rounded-md shadow-sm p-1.5 text-sm focus:ring focus:ring-blue-200"
+                  @change="populateResponse"
+                >
+                  <option value="" disabled>Select a prompt...</option>
+                  <option
+                    v-for="(entry, index) in userPrompts"
+                    :key="index"
+                    :value="entry.prompt"
+                  >
+                    {{ entry.prompt }}
+                  </option>
+                </select>
+              </div>
+
+              <!-- Event Response -->
+              <div class="mb-2">
+                <label for="response" class="block text-sm font-medium text-gray-600">Event Response</label>
+                <textarea
+                  v-model="eventData.response"
+                  id="response"
+                  class="block w-full border border-gray-300 rounded-md shadow-sm p-1.5 text-sm focus:ring focus:ring-blue-200"
+                  placeholder="Enter event response"
+                ></textarea>
               </div>
 
               <!-- Start Date Picker -->
@@ -83,6 +113,8 @@
       <div v-if="selectedEvent" class="fixed z-50 inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center">
         <div class="bg-white p-4 rounded-lg shadow-lg max-w-md w-full">
           <h4 class="text-lg font-semibold mb-2">{{ selectedEvent.title }}</h4>
+          <p class="text-gray-700 text-sm"><strong>Prompt:</strong> {{ selectedEvent.extendedProps.prompt }}</p>
+          <p class="text-gray-700 text-sm"><strong>Response:</strong> {{ selectedEvent.extendedProps.response }}</p>
           <p class="text-gray-700 text-sm"><strong>Start:</strong> {{ new Date(selectedEvent.start).toLocaleString() }}</p>
           <p class="text-gray-700 text-sm"><strong>End:</strong> {{ new Date(selectedEvent.end).toLocaleString() }}</p>
 
@@ -120,11 +152,14 @@ axios.defaults.baseURL = 'http://127.0.0.1:8000';
 // Form states
 const eventData = reactive({
   title: '',
+  prompt: '',
+  response: '',
   startDate: '',
   endDate: '',
 });
 const selectedEvent = ref(null);
 const formVisible = ref(false);
+const userPrompts = ref([]); // Array per memorizzare i prompt e le response dell'utente
 
 // Calendar options
 const clickTimeout = ref(null);
@@ -162,8 +197,28 @@ const closeForm = () => {
   formVisible.value = false;
   // Reset form data
   eventData.title = '';
+  eventData.prompt = '';
+  eventData.response = '';
   eventData.startDate = '';
   eventData.endDate = '';
+};
+
+// Function to populate response based on selected prompt
+const populateResponse = () => {
+  console.log('Selected Prompt:', eventData.prompt); // Debug: Verifica quale prompt è stato selezionato
+  const selectedPrompt = userPrompts.value.find((entry) => entry.prompt === eventData.prompt);
+  console.log('Selected Entry:', selectedPrompt); // Debug: Controlla l'entry selezionato
+  if (selectedPrompt && selectedPrompt.response) {
+    // Se il response è un JSON, decodificalo
+    try {
+      const parsedResponse = JSON.parse(selectedPrompt.response);
+      eventData.response = parsedResponse.facebook || parsedResponse.twitter || parsedResponse.tiktok || parsedResponse.instagram || '';
+    } catch (error) {
+      eventData.response = selectedPrompt.response;
+    }
+  } else {
+    eventData.response = '';
+  }
 };
 
 // Fetch events
@@ -172,22 +227,43 @@ const fetchEvents = async () => {
     const { data } = await axios.get('/api/events');
     calendarOptions.value.events = data.map((event) => ({
       id: event.id,
-      title: event.title, // Mantieni solo il titolo
-      start: event.start.split('T')[0], // Escludi l'orario dalla data di inizio
-      end: event.end.split('T')[0], // Escludi l'orario dalla data di fine
+      title: event.title,
+      start: event.start.split('T')[0],
+      end: event.end.split('T')[0],
+      extendedProps: {
+        prompt: event.prompt,
+        response: event.response,
+      },
     }));
   } catch (error) {
     console.error('Error fetching events:', error);
   }
 };
 
+// Fetch user prompts from search history
+const fetchUserPrompts = async () => {
+  try {
+    const { data } = await axios.get('/user-prompts');
+    console.log('Received prompts:', data); // Debug: Verifica i dati ricevuti
+    userPrompts.value = data;
 
+    // Controlla se i prompt sono correttamente popolati
+    userPrompts.value.forEach((entry, index) => {
+      console.log(`Prompt ${index}:`, entry.prompt); // Debug: Stampa i prompt ricevuti
+    });
+
+  } catch (error) {
+    console.error('Error fetching user prompts:', error.response ? error.response : error.message);
+  }
+};
 
 // Add a new event
 const addEvent = async () => {
   try {
     const newEvent = {
       title: eventData.title,
+      prompt: eventData.prompt,
+      response: eventData.response,
       start_date: new Date(eventData.startDate).toISOString(),
       end_date: new Date(eventData.endDate).toISOString(),
     };
@@ -215,9 +291,13 @@ const closeEventDetails = () => {
   selectedEvent.value = null;
 };
 
-// Fetch events on component mount
-onMounted(fetchEvents);
+// Fetch events and prompts on component mount
+onMounted(() => {
+  fetchEvents();
+  fetchUserPrompts();
+});
 </script>
+
 
 <style scoped>
 form {
