@@ -35,7 +35,7 @@ const submitSeoPrompt = async () => {
 
   try {
     const response = await axios.post('/api/generate-seo-content', {
-      prompt: seoPrompt.value
+      prompt: seoPrompt.value,
     });
 
     seoResponse.value = response.data.content || 'No content generated.';
@@ -55,15 +55,23 @@ onMounted(fetchUserCredits);
 <template>
   <AppLayout>
     <Head title="SEO Optimization" />
-
     <template #header>
-      <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-        SEO Optimization Tool
-      </h2>
+      <h2 class="font-semibold text-xl text-gray-800 leading-tight">SEO Optimizer</h2>
     </template>
 
-    <main class="py-12 bg-gray-100">
-      <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+
+    <!-- Background Image Container -->
+    <div class="relative min-h-screen flex items-center justify-center transition-all duration-500">
+      <!-- Background Image -->
+      <img
+        id="background"
+        class="absolute inset-0 object-cover w-full h-full   duration-500"
+        src="http://127.0.0.1:8000/storage/img/minimalist_back_3.jpg"
+        alt="background"
+      />
+
+      <!-- Main Content Container -->
+      <div class="relative z-10 max-w-7xl mx-auto sm:px-6 lg:px-8 p-8 bg-white bg-opacity-30 rounded-lg shadow-2xl backdrop-filter backdrop-blur-lg">
         <div class="bg-white shadow sm:rounded-lg p-8">
           <div class="text-center mb-8">
             <h3 class="text-2xl font-bold text-[#00A3E0]">Generate SEO Optimized Content</h3>
@@ -106,16 +114,27 @@ onMounted(fetchUserCredits);
           </div>
         </div>
       </div>
-    </main>
+    </div>
   </AppLayout>
 </template>
 
 <style scoped>
-/* Styling */
+#background {
+  /* Background image opacity */
+  transition: opacity 0.5s ease;
+}
+.bg-white {
+  background-color: rgba(255, 255, 255, 0.8); /* Slight transparency */
+}
+.bg-opacity-30 {
+  backdrop-filter: blur(10px); /* Adds a blur effect to the background */
+}
+button,
 textarea {
   transition: all 0.3s ease;
 }
-button {
-  transition: all 0.3s ease;
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 </style>

@@ -21,6 +21,9 @@ use App\Http\Controllers\KnowledgeBaseController;
 Route::get('/blog', function () {
     return Inertia::render('Blog');
 });
+Route::get('/KnowledgeBase', function () {
+    return Inertia::render('KnowledgeBase');
+});
 Route::get('/user-prompts', [SearchHistoryController::class, 'getUserPrompts'])->middleware('auth');
 
 // Gestisce la rotta /trends senza parametro

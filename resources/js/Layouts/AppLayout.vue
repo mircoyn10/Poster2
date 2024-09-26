@@ -110,7 +110,7 @@ const toggleNavigationDropdown = () => {
                                     @mouseleave="closeResourcesMenu"
                                 >
                                     <Link href="/blog" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Blog</Link>
-                                    <Link href="/knowledge-base" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Knowledge Base</Link>
+                                    <Link href="/KnowledgeBase" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Knowledge Base</Link>
                                 </div>
                             </div>
 
