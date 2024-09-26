@@ -8,14 +8,21 @@ use App\Http\Controllers\BuyCoinsController;
 use App\Models\CoinPackage;
 use App\Http\Controllers\CoinPackageControllerController;
 use App\Http\Controllers\PaymentController;
-
+use App\Http\Controllers\GoogleTrendsController;
 use App\Http\Controllers\SearchHistoryController;
 use App\Http\Controllers\ClearHistoryController;
 use App\Http\Controllers\SocialiteController;
+use App\Http\Controllers\BlogController;
+use App\Http\Controllers\KnowledgeBaseController;
 
+// Rotte per il blog
 
+// Rotte per la knowledge base
+Route::get('/blog', function () {
+    return Inertia::render('Blog');
+});
 Route::get('/user-prompts', [SearchHistoryController::class, 'getUserPrompts'])->middleware('auth');
-use App\Http\Controllers\GoogleTrendsController;
+
 // Gestisce la rotta /trends senza parametro
 
 use App\Http\Controllers\EventController;

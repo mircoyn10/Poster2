@@ -9,6 +9,7 @@ use App\Http\Controllers\BuyCoinsController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\SeoController;
 
+
 Route::post('/generate-seo-content', [SeoController::class, 'generateSeoContent'])->middleware('web');
 
 Route::apiResource('events', EventController::class)->middleware('web');

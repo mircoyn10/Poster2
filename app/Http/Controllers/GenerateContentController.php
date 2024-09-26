@@ -127,7 +127,7 @@ class GenerateContentController extends Controller
             'tiktok' => [
                 'focus' => 'short, creative video concepts with trending elements',
                 'elements' => 'Video concept (15-60 seconds), Background music or sound suggestion, 2-3 relevant hashtags',
-                'format' => "1. Video Concept:\n2. Sound/Music:\n3. Hashtags:\n4. Call-to-Action:"
+                'format' => "1.TikTok Video Concept:\n2. Sound/Music:\n3. Hashtags:\n4. Call-to-Action:"
             ],
             'twitter' => [
                 'focus' => 'concise, engaging tweets that spark conversation',
@@ -137,13 +137,13 @@ class GenerateContentController extends Controller
             'facebook' => [
                 'focus' => 'community-driven content with detailed insights',
                 'elements' => 'Post text (200-300 characters), Content type suggestion (poll, image, video, etc.), Call-to-action',
-                'format' => "1. Post Content:\n2. Content Type:\n3. Call-to-Action:\n4. Discussion Starter:"
+                'format' => "1.Facebook Post Content:\n2. Content Type:\n3. Call-to-Action:\n4. Discussion Starter:"
             ]
         ];
 
         $setting = $platformSettings[$platform];
 
-        return "In {$language},return the name of the {$platform}, and create an innovative and engaging content idea for {$platform} based on: '{$prompt}'. 
+        return "In {$language},specify  {$platform}, and create an innovative and engaging content idea for {$platform} based on: '{$prompt}'. 
         Focus on {$setting['focus']}. 
         Include these elements: {$setting['elements']}.
         Be creative, trendy, and audience-focused. Aim to maximize engagement and virality potential.
