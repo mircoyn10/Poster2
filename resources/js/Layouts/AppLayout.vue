@@ -8,6 +8,7 @@ import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { faCoins } from '@fortawesome/free-solid-svg-icons';
+import Footer from '@/Components/Footer.vue';
 
 let timeout;
 
@@ -25,6 +26,18 @@ const openDashboardMenu = () => {
 const showingNavigationDropdown = ref(false);
 const isDashboardMenuOpen = ref(false); // Gestione del sottomenu Dashboard
 const isResourcesMenuOpen = ref(false);
+const isCompanyMenuOpen = ref(false);
+
+const openCompanyMenu = () => {
+    clearTimeout(timeout);
+    isCompanyMenuOpen.value = true;
+};
+const closeCompanyMenu = () => {
+    timeout = setTimeout(() => {
+        isCompanyMenuOpen.value = false;
+    }, 200);
+}; // Gestion
+
 const openResourcesMenu = () => {
     clearTimeout(timeout);
     isResourcesMenuOpen.value = true;
@@ -111,6 +124,28 @@ const toggleNavigationDropdown = () => {
                                 >
                                     <Link href="/blog" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Blog</Link>
                                     <Link href="/KnowledgeBase" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Knowledge Base</Link>
+                                    <Link href="/community" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Community</Link>
+                                </div>
+                            </div>
+                            <div 
+                                @mouseenter="openCompanyMenu" 
+                                @mouseleave="closeCompanyMenu" 
+                                class="relative"
+                            >
+                                <NavLink href="#" class="cursor-pointer">
+                                    Company
+                                </NavLink>
+
+                                <!-- Sottomenu per Resources -->
+                                <div 
+                                    v-if="isCompanyMenuOpen" 
+                                    class="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10 transition-opacity duration-300"
+                                    @mouseenter="openCompanyMenu" 
+                                    @mouseleave="closeCompanyMenu"
+                                >
+                                    <Link href="/contact" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Contacts</Link>
+                                    <Link href="/poster/story" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">The Poster Project</Link>
+                                    
                                 </div>
                             </div>
 
@@ -245,6 +280,8 @@ const toggleNavigationDropdown = () => {
             </main>
         </div>
     </div>
+    
+
 </template>
 
 <style scoped>

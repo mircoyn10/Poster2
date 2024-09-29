@@ -8,23 +8,26 @@
     <div class="py-12 bg-gray-100" style="background-image: url('http://127.0.0.1:8000/storage/img/minimalist_back_3.jpg'); background-repeat: repeat; background-position: top left;">
       <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <!-- Index Section -->
+        <!-- Index Section -->
         <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg mb-8 p-8 bg-opacity-80">
           <h2 class="text-3xl font-bold mb-8 text-indigo-700">Article Index</h2>
           <ul class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <li v-for="article in allArticles" :key="article.id">
-              <a 
-                href="#" 
-                @click.prevent="scrollToArticle(article.id)" 
+              <!-- Usa router-link per collegare gli articoli alla pagina singola -->
+              <router-link
+                :to="{ name: 'single-article', params: { id: article.id } }"
+                @click.prevent="navigateToArticle(article.id)"
                 class="text-lg text-indigo-600 hover:text-indigo-800 transition duration-300 flex items-center"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                   <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
                 </svg>
                 {{ article.title }}
-              </a>
+              </router-link>
             </li>
           </ul>
         </div>
+
 
         <!-- Latest Two Articles Section -->
         <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-8 mb-8 bg-opacity-80">
@@ -40,7 +43,10 @@
               class="bg-white p-6 rounded-lg shadow-md transition duration-300 hover:shadow-xl border border-gray-200"
             >
               <h3 class="text-2xl font-semibold mb-3 text-gray-800 hover:text-indigo-600 transition duration-300">
-                {{ article.title }}
+                <!-- Link all'articolo dinamico con router-link -->
+                <router-link :to="{ name: 'single-article', params: { id: article.id } }">
+                  {{ article.title }}
+                </router-link>
               </h3>
 
               <div class="relative">
@@ -61,16 +67,16 @@
                 class="text-gray-600 mb-4 leading-relaxed prose prose-sm max-w-none"
               ></div>
 
-              <button 
+              <router-link 
                 v-if="article.body.length > 150" 
-                @click="toggleArticle(article)" 
+                :to="{ name: 'single-article', params: { id: article.id } }"
                 class="text-indigo-600 hover:text-indigo-800 transition duration-300 mb-4 flex items-center"
               >
-                {{ article.expanded ? 'Read less' : 'Read more' }}
+                Read more
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-1" viewBox="0 0 20 20" fill="currentColor">
                   <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                 </svg>
-              </button>
+              </router-link>
 
               <div class="flex items-center justify-between text-sm text-gray-500 mt-4 pt-4 border-t border-gray-200">
                 <div class="flex items-center">
@@ -139,9 +145,11 @@
         </div>
       </div>
     </div>
+    
   </AppLayout>
 </template>
 <script setup>
+import Footer from '@/Components/Footer.vue';
 import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
 import { Head } from '@inertiajs/vue3';
@@ -152,22 +160,60 @@ const latestArticles = ref([]);
 const currentPage = ref(1);
 const articlesPerPage = 10;
 
+// Aggiungi una variabile per la paginazione
+const pagination = ref({
+  current_page: 1,
+  last_page: 1,
+  per_page: articlesPerPage,
+  total: 0
+});
+
+// Toggle article body visibility
+const toggleArticle = (article) => {
+  article.expanded = !article.expanded;
+};
+const navigateToArticle = (id) => {
+  router.push({ name: 'single-article', params: { id: id } });
+};
 // Fetch articles from the server
 const fetchArticles = async () => {
   try {
-    const response = await axios.get('/articles');
-    allArticles.value = response.data.map(article => ({
-      ...article,
-      expanded: false
-    }));
-    latestArticles.value = allArticles.value.slice(0, 2).map(article => ({
-      ...article,
-      expanded: false
-    }));
+    const response = await axios.get('/articles', {
+      params: { page: currentPage.value }
+    });
+
+    if (response.data && response.data.data) {
+      allArticles.value = response.data.data.map(article => ({
+        ...article,
+        expanded: false
+      }));
+
+      latestArticles.value = allArticles.value.slice(0, 2);
+
+      pagination.value = {
+        current_page: response.data.current_page,
+        last_page: response.data.last_page,
+        per_page: response.data.per_page,
+        total: response.data.total
+      };
+    }
   } catch (error) {
     console.error('Error fetching articles:', error);
   }
 };
+
+onMounted(fetchArticles);
+
+
+
+const paginationLinks = computed(() => {
+  const links = [];
+  for (let i = 1; i <= pagination.value.last_page; i++) {
+    links.push({ page: i, isActive: i === pagination.value.current_page });
+  }
+  return links;
+});
+
 
 onMounted(fetchArticles);
 
@@ -179,18 +225,20 @@ const paginatedArticles = computed(() => {
 });
 
 // Computed property for total pages
-const totalPages = computed(() => Math.ceil(allArticles.value.length / articlesPerPage));
+const totalPages = computed(() => pagination.value.last_page);
 
 // Pagination methods
 const nextPage = () => {
   if (currentPage.value < totalPages.value) {
     currentPage.value++;
+    fetchArticles();
   }
 };
 
 const prevPage = () => {
   if (currentPage.value > 1) {
     currentPage.value--;
+    fetchArticles();
   }
 };
 
@@ -205,16 +253,14 @@ const formatDate = (dateString) => {
 };
 
 // Toggle the expanded state of an article
-const toggleArticle = (article) => {
-  article.expanded = !article.expanded;
-};
+
 
 // Scroll to article function (you may need to implement this based on your layout)
 const scrollToArticle = (articleId) => {
-  // Implementation depends on your specific layout and requirements
   console.log(`Scrolling to article ${articleId}`);
 };
 </script>
+
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');

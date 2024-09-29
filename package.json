@@ -27,6 +27,8 @@
         "@fullcalendar/daygrid": "^6.1.15",
         "@fullcalendar/interaction": "^6.1.15",
         "@fullcalendar/vue3": "^6.1.15",
-        "log": "^6.3.1"
+        "log": "^6.3.1",
+        "lucide-vue-next": "^0.446.0",
+        "vue-router": "^4.4.5"
     }
 }

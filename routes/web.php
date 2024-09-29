@@ -15,16 +15,27 @@ use App\Http\Controllers\SocialiteController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\KnowledgeBaseController;
 use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\ContactController;
+use App\Http\Controllers\CommunityController;
+use App\Http\Controllers\PosterStoryController;
+
+Route::get('/community', [CommunityController::class, 'index'])->name('community.index');
+Route::get('/poster/story', [PosterStoryController::class, 'index'])->name('PosterStory.index');
+Route::get('/contact', [ContactController::class, 'index'])->name('contact.index');
 // Rotte per il blog
 Route::middleware(['web'])->group(function () {
     Route::get('/dashboard/articles', function () {
         return Inertia::render('DashboardArticles');
     })->name('dashboard.articles');
 
-    Route::get('/articles', [ArticleController::class, 'index']);
-    Route::post('/articles', [ArticleController::class, 'store'])->middleware('auth');
-    Route::get('/articles/{id}', [ArticleController::class, 'show']);
+
 });
+
+
+Route::get('/articles', [ArticleController::class, 'index']);
+Route::get('/article/{id}', [ArticleController::class, 'show'])->name('articles.show');
+Route::post('/articles', [ArticleController::class, 'store']);
+
 // Rotte per la knowledge base
 Route::get('/blog', function () {
     return Inertia::render('Blog');
